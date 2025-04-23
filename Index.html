@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de QCM et QCD</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+</head>
+<body>
+    <h1>Générateur de QCM et QCD pour votre cours</h1>
+
+    <!-- Section pour télécharger un PDF -->
+    <input type="file" id="pdf-file" accept="application/pdf"/>
+    <button onclick="generateQuestions()">Générer des Questions</button>
+    
+    <div id="questions"></div>  <!-- Zone pour afficher les questions générées -->
+
+    <script>
+        let pdfText = "";
+
+        // Fonction pour traiter le fichier PDF
+        document.getElementById('pdf-file').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && file.type === 'application/pdf') {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const pdfData = new Uint8Array(e.target.result);
+                    pdfjsLib.getDocument(pdfData).promise.then(pdf => {
+                        pdf.getPage(1).then(page => {
+                            page.getTextContent().then(textContent => {
+                                pdfText = textContent.items.map(item => item.str).join(" ");
+                                console.log(pdfText);  // Affiche le texte extrait pour que tu puisses le tester
+                            });
+                        });
+                    });
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        });
+
+        // Fonction pour générer des questions à partir du texte extrait
+        function generateQuestions() {
+            const questionsDiv = document.getElementById("questions");
+            questionsDiv.innerHTML = "";  // Réinitialiser les questions
+
+            if (pdfText === "") {
+                questionsDiv.innerHTML = "Veuillez télécharger un PDF d'abord.";
+                return;
+            }
+
+            // Exemple de génération d'une question basique à partir du texte extrait
+            const sampleQuestion = `Quel est le rôle du texte suivant : "${pdfText.substring(0, 100)}..." ?`;
+            const qcmQuestion = `
+                <p>Question à Choix Multiple (QCM) :</p>
+                <p>${sampleQuestion}</p>
+                <ul>
+                    <li>A. Rôle A</li>
+                    <li>B. Rôle B</li>
+                    <li>C. Rôle C</li>
+                    <li>D. Rôle D</
