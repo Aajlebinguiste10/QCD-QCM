@@ -1,0 +1,64 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Générateur de QCM/QCD</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    textarea, button, select { width: 100%; margin: 10px 0; padding: 10px; }
+    .question { background: #f4f4f4; margin: 10px 0; padding: 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h1>Générateur de QCM/QCD</h1>
+  <label>Colle ton cours ici :</label>
+  <textarea id="cours" rows="10" placeholder="Colle ton contenu ici..."></textarea>
+
+  <label for="type">Type de questions :</label>
+  <select id="type">
+    <option value="qcd">QCD (Vrai/Faux)</option>
+    <option value="qcm">QCM (4 choix)</option>
+  </select>
+
+  <button onclick="genererQuestions()">Générer les QCM/QCD</button>
+  <button onclick="exporterPDF()">Exporter en PDF</button>
+
+  <div id="resultat"></div>
+
+  <script>
+    function genererQuestions() {
+      const texte = document.getElementById("cours").value;
+      const type = document.getElementById("type").value;
+      const phrases = texte.split('.');
+      let html = "";
+      let i = 1;
+      for (let phrase of phrases) {
+        phrase = phrase.trim();
+        if (phrase.length < 10) continue;
+        if (type === "qcd") {
+          html += `<div class='question'><strong>Q${i} :</strong> ${phrase}<br>Réponse : A) Vrai  B) Faux</div>`;
+        } else if (type === "qcm") {
+          html += `<div class='question'><strong>Q${i} :</strong> ${phrase}<br>
+            A) Réponse plausible 1<br>
+            B) Réponse plausible 2<br>
+            C) Réponse plausible 3<br>
+            D) Réponse plausible 4</div>`;
+        }
+        i++;
+      }
+      document.getElementById("resultat").innerHTML = html;
+    }
+
+    function exporterPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const texte = document.getElementById("resultat").innerText;
+      const lignes = doc.splitTextToSize(texte, 180);
+      doc.text(lignes, 10, 10);
+      doc.save("QCM_QCD_Générés.pdf");
+    }
+  </script>
+</body>
+</html>
